@@ -1,8 +1,10 @@
-/*https://contest.yandex.ru/contest/24810/run-report/131505615/
+/*
+https://contest.yandex.ru/contest/24810/run-report/132496581/
 -- ПРИНЦИП РАБОТЫ --
  Осуществляется удаление элемента из дерева. Когда удаляется узел, который имеет два потомка, его 
  значение заменяется на минимальное значение в правом поддереве, а затем это минимальное значение 
- удаляется рекурсивно.
+ удаляется рекурсивно. Если удаляемый узел не имеет потомков, он просто удаляется. Если потомок один, то
+ она заменяет узел собой.
 -- ДОКАЗАТЕЛЬСТВО КОРРЕКТНОСТИ --
  В функции remove осуществляется рекурсивный поиск узла по ключу. Если ключ найден, то:
  Если у узла нет потомков, он просто удаляется.
@@ -31,6 +33,8 @@ struct Node {
 #endif
 #include <cassert>
 
+Node* removeNode(Node* root);
+
 Node* findMinim(Node* root) {
     while(root->left != nullptr) {
         root = root->left;
@@ -39,31 +43,36 @@ Node* findMinim(Node* root) {
 }
 
 Node* remove(Node* root, int key) {
-    
-    if(root == nullptr) {
+    if (root == nullptr) {
         return nullptr;
     }
-
-    if(root->value == key) {
-        if(root->right == nullptr) {
-            Node* tmp = root->left;
-            return tmp;
-        } else if(root->left == nullptr) {
-            Node* tmp = root->right;
-            return tmp;
-        } else {
-            Node* tmp = findMinim(root->right);
-            root->value = tmp->value;
-            root->right = remove(root->right, tmp->value);
-        }
-    } else if(key > root->value) {
+    
+    if (key > root->value) {
         root->right = remove(root->right, key);
-    } else {
+    } else if (key < root->value) {
         root->left = remove(root->left, key);
+    } else {
+        root = removeNode(root);
     }
-
+    
     return root;
 }
+
+Node* removeNode(Node* root) {
+    if (root->right == nullptr) {
+        return root->left;
+    }
+    if (root->left == nullptr) {
+        return root->right;
+    }
+    
+    Node* tmp = findMinim(root->right);
+    root->value = tmp->value;
+    root->right = remove(root->right, tmp->value);
+    
+    return root;
+}
+
 
 #ifndef REMOTE_JUDGE
 void test() {
